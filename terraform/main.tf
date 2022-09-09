@@ -13,16 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-resource "google_project_service" "compute" {
-  service = "compute.googleapis.com"
-  disable_dependent_services = true
-}
-
-resource "google_project_service" "secretmanager" {
-  service = "secretmanager.googleapis.com"
-  disable_dependent_services = true
-}
-
 resource "google_service_account" "default" {
   account_id = "clickhouse-compute-cluster-sa"
 }
