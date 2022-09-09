@@ -1,3 +1,7 @@
+variable "access_token" {
+  type        = string
+}
+
 variable "project_id" {
   type        = string
   description = "the Google Cloud project id to use"
