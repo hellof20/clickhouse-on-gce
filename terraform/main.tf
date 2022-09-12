@@ -13,19 +13,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+resource "google_project_service" "compute" {
+  service = "compute.googleapis.com"
+  timeouts {
+    create = "30m"
+    update = "40m"
+  }
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "secretmanager" {
+  service = "secretmanager.googleapis.com"
+  timeouts {
+    create = "30m"
+    update = "40m"
+  }
+  disable_dependent_services = true
+}
+
 resource "google_service_account" "default" {
   account_id = "clickhouse-compute-cluster-sa"
 }
+
 resource "google_secret_manager_secret" "cluster_password" {
   ## this secret name is hard coded in the scripts, don't change
   secret_id = "ch-default-pass-fb6fa0fb3c91"
   replication {
     automatic = true
   }
-
+  depends_on = [google_project_service.secretmanager]
 }
 
 module "gen_secret" {
+  depends_on = [google_project_service.secretmanager]
   source  = "terraform-google-modules/gcloud/google"
   version = "~> 2.0"
 
@@ -53,6 +73,7 @@ resource "google_secret_manager_secret_iam_binding" "binding" {
 
 
 resource "google_compute_disk" "clickhouse" {
+  depends_on = [google_project_service.compute]
   count                     = var.cluster_size
   name                      = "clickhouse-${count.index}-data"
   type                      = var.data_disktype
@@ -106,10 +127,11 @@ resource "google_compute_instance" "clickhouse" {
   bash /root/clickhouse-start-up-script.sh /root/cluster_size.txt
   EOT
 
-  depends_on = [google_secret_manager_secret.cluster_password, google_secret_manager_secret_iam_binding.binding, google_compute_instance.zookeeper]
+  depends_on = [google_project_service.compute, google_secret_manager_secret.cluster_password, google_secret_manager_secret_iam_binding.binding, google_compute_instance.zookeeper]
 }
 
 resource "google_compute_instance" "zookeeper" {
+  depends_on = [google_project_service.compute]
   count        = 3
   name         = "zook-${count.index}"
   machine_type = "e2-standard-4"
@@ -148,6 +170,7 @@ resource "google_compute_instance" "zookeeper" {
 }
 
 resource "google_compute_instance_group" "clickhouse-cluster" {
+  depends_on = [google_project_service.compute]
   project   = var.project_id
   name      = "clickhouse-cluster-instance-group"
   zone      = var.zone
@@ -159,6 +182,7 @@ resource "google_compute_instance_group" "clickhouse-cluster" {
 }
 
 module "ilb" {
+  depends_on = [google_project_service.compute]
   source      = "GoogleCloudPlatform/lb-internal/google"
   version     = "~> 4.0"
   project     = var.project_id
@@ -194,6 +218,7 @@ module "ilb" {
 }
 
 resource "google_compute_instance" "grafana" {
+  depends_on = [google_project_service.compute]
   name         = "clickhouse-grafana"
   machine_type = "e2-standard-4"
   zone         = var.zone
