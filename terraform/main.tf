@@ -25,32 +25,27 @@ resource "google_secret_manager_secret" "cluster_password" {
   }
 }
 
-module "gen_secret" {
-  source  = "terraform-google-modules/gcloud/google"
-  version = "~> 2.0"
-
-  platform = "linux"
-  additional_components = ["kubectl", "beta"]
-
-  create_cmd_entrypoint  = "/bin/sh"
-  create_cmd_body        = join(" ", [ "-c",<<-EOT
-  dd if=/dev/urandom count=1|shasum|cut -c 1-12|gcloud --project ${var.project_id} secrets versions add ${google_secret_manager_secret.cluster_password.secret_id} --data-file=-
-  EOT
-  ]
-  )
-}
-
 resource "google_secret_manager_secret_iam_binding" "binding" {
   project   = var.project_id
   secret_id = google_secret_manager_secret.cluster_password.secret_id
   role      = "roles/secretmanager.secretAccessor"
-
   members = [
     "serviceAccount:${google_service_account.default.email}"
   ]
-  depends_on = [module.gen_secret]
 }
 
+resource "random_string" "secret-data" {
+  length  = 12
+  upper   = false
+  numeric  = false
+  lower   = true
+  special = false
+}
+
+resource "google_secret_manager_secret_version" "secret-version-basic" {
+  secret = google_secret_manager_secret.secret-basic.id
+  secret_data = local.secret-data
+}
 
 resource "google_compute_disk" "clickhouse" {
   count                     = var.cluster_size
