@@ -13,11 +13,13 @@ terraform {
 }
 
 provider "google" {
+  access_token = var.access_token
   project = var.project_id
   region  = var.region
 }
 
 provider "google-beta" {
+  access_token = var.access_token
   project = var.project_id
   region  = var.region
 }
