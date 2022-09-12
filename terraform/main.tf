@@ -31,10 +31,10 @@ module "gen_secret" {
 
   platform = "linux"
   additional_components = ["kubectl", "beta"]
-
+  use_tf_google_credentials_env_var = true
   create_cmd_entrypoint  = "/bin/sh"
   create_cmd_body        = join(" ", [ "-c",<<-EOT
-  export CLOUDSDK_AUTH_ACCESS_TOKEN=${var.access_token};dd if=/dev/urandom count=1|shasum|cut -c 1-12|gcloud --project ${var.project_id} secrets versions add ${google_secret_manager_secret.cluster_password.secret_id} --data-file=-
+  dd if=/dev/urandom count=1|shasum|cut -c 1-12|gcloud --project ${var.project_id} secrets versions add ${google_secret_manager_secret.cluster_password.secret_id} --data-file=-
   EOT
   ]
   )
