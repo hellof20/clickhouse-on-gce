@@ -82,6 +82,7 @@ resource "google_compute_instance" "clickhouse" {
     network    = var.cluster_network
     subnetwork = var.cluster_subnetwork
   }
+  access_config {}
   metadata = {
     clickhouse-startup-script = file("../scripts/clickhouse-start-up-script.sh")
     clickhouse-config-cluster = file("../scripts/clickhouse-config-cluster.py")
@@ -125,6 +126,7 @@ resource "google_compute_instance" "zookeeper" {
     network    = var.cluster_network
     subnetwork = var.cluster_subnetwork
   }
+  access_config {}
   metadata = {
     zookeeper-startup-script = file("../scripts/zk-install.sh")
     zookeeper-index          = "${count.index}"
@@ -208,6 +210,7 @@ resource "google_compute_instance" "grafana" {
     network    = var.cluster_network
     subnetwork = var.cluster_subnetwork
   }
+  access_config {}
   metadata = {
     grafana-startup-script = file("../scripts/grafana-install.sh")
     grafana-clickhouse-ilb = "${module.ilb.ip_address}"
