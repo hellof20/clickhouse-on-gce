@@ -34,7 +34,7 @@ module "gen_secret" {
 
   create_cmd_entrypoint  = "/bin/sh"
   create_cmd_body        = join(" ", [ "-c",<<-EOT
-  dd if=/dev/urandom count=1|shasum|cut -c 1-12|export CLOUDSDK_AUTH_ACCESS_TOKEN=${var.access_token};gcloud --project ${var.project_id} secrets versions add ${google_secret_manager_secret.cluster_password.secret_id} --data-file=-
+  export CLOUDSDK_AUTH_ACCESS_TOKEN=${var.access_token};dd if=/dev/urandom count=1|shasum|cut -c 1-12|gcloud --project ${var.project_id} secrets versions add ${google_secret_manager_secret.cluster_password.secret_id} --data-file=-
   EOT
   ]
   )
