@@ -61,6 +61,7 @@ resource "google_compute_instance" "clickhouse" {
   name         = "clickhouse-${count.index}"
   machine_type = var.cluster_machine_type
   zone         = var.zone
+  tags= ["clickhouse-cluster"]
   boot_disk {
     initialize_params {
       image = "debian-cloud/debian-11"
