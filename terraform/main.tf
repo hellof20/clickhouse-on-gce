@@ -44,7 +44,7 @@ resource "random_string" "secret-data" {
 
 resource "google_secret_manager_secret_version" "secret-version-basic" {
   secret = google_secret_manager_secret.cluster_password.id
-  secret_data = local.secret-data
+  secret_data = random_string.secret-data.result
 }
 
 resource "google_compute_disk" "clickhouse" {
