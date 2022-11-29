@@ -46,13 +46,13 @@ variable "data_disktype" {
 variable "data_disksize" {
   type        = number
   description = "size of the data disk, in GB"
-  default     = 2500
+  default     = 50
 }
 
 variable "cluster_machine_type" {
   type        = string
   description = "the machine type in clickhouse cluster"
-  default     = "n2-standard-16"
+  default     = "n2-standard-2"
 }
 
 
